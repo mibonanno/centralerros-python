@@ -1,0 +1,168 @@
+{% extends "base_logs.html" %}
+
+{% block content %}
+
+<head>
+    <title>Logs</title>
+
+    <link rel="stylesheet" type="text/css" href="/static/admin/css/base.css" />
+    <link rel="stylesheet" type="text/css" href="/static/admin/css/changelists.css" />
+    <link rel="stylesheet" type="text/css" href="/static/admin/css/responsive.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/admin/jsi18n/"></script>
+    <script type="text/javascript" src="/static/admin/js/vendor/jquery/jquery.js"></script>
+    <script type="text/javascript" src="/static/admin/js/jquery.init.js"></script>
+    <script type="text/javascript" src="/static/admin/js/core.js"></script>
+    <script type="text/javascript" src="/static/admin/js/admin/RelatedObjectLookups.js"></script>
+    <script type="text/javascript" src="/static/admin/js/actions.js"></script>
+    <script type="text/javascript" src="/static/admin/js/urlify.js"></script>
+    <script type="text/javascript" src="/static/admin/js/prepopulate.js"></script>
+    <script type="text/javascript" src="/static/admin/js/vendor/xregexp/xregexp.js"></script>
+    <script type="text/javascript" src="/static/js/check.js"></script>
+
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <meta name="robots" content="NONE,NOARCHIVE" />
+</head>
+
+<main>
+
+    <body class="app-api model-log change-list" data-admin-utc-offset="0">
+        <div id="container">
+            <div id="content" class="flex">
+                <h1>Listagem de logs</h1>
+
+                <div id="content-main">
+                    <ul class="object-tools">
+                        <li>
+                            <a href="/admin/api/log/add/" class="addlink">
+                                Add log
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="module" id="changelist">
+                        <form id="changelist-form" method="post" novalidate>
+                            <input type="hidden" name="csrfmiddlewaretoken"
+                                value="n8IvEJoVbn2CWlcs7mi6tEs8g4nmJBfVTz1a9AkZKF1gLs8YWvGUGlWynEjPw1j5" />
+                            <div class="actions">
+
+                                <label>Ambiente:
+                                    <select name="env" required>
+                                        <option value="" selected>---------</option>
+                                        {% for environment in environments %}
+                                            <option value="{{environment.id}}">{{environment.description}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </label><input type="hidden" name="select_across" value="0" class="select-across" />
+                                
+                                <label>Ordenar por:
+                                    <select name="action" required>
+                                        <option value="" selected>---------</option>
+                                        <option value="level" selected>Level</option>
+                                        <option value="log.number_events" selected>Frequencia</option>
+                                        
+                                    </select>
+                                </label>
+
+                                <label>Buscar por:
+                                    <select name="action" required>
+                                        <option value="" selected>---------</option>
+                                        <option value="level" selected>Level</option>
+                                        <option value="log.description" selected>Descrição</option>
+                                        <option value="origin" selected>Origem</option>
+                                        
+                                    </select>
+                                </label>
+
+                                <input type="text" placeholder="Buscar">
+                                <input type="hidden" name="select_across" value="0" class="select-across" />
+
+
+                            </div>
+                            <div class="module" id="changelist">
+                                    <button type="button" class="btn btn-default" title="Run the selected action"
+                                        value="arquivar" id="archive-button">
+                                        Arquivar
+                                    </button>
+                                <form action="{% url 'logs-delete-list' %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="button" class="btn btn-default" id="delete-button">
+                                        Apagar
+                                    </button>
+                                    <a href="{% url 'logs-delete-list' %}">Apagar Lista</a>
+
+                                    <div class="results" id="items-table">
+                                        <table id="result_list">
+                                            <thead>
+                                                <tr>
+                                                    <th scope="col" class="action-checkbox-column">
+                                                        <div class="text">
+                                                            <span><input type="checkbox" id="action-toggle" /></span>
+                                                        </div>
+                                                        <div class="clear"></div>
+                                                    </th>
+                                                    <th scope="col" class="column-__str__">
+                                                        <div class="text"><span>Level</span></div>
+                                                        <div class="clear"></div>
+                                                    </th>
+                                                    <th>
+                                                        <div class="text"><span>Log</span></div>
+                                                        <div class="clear"></div>
+                                                    </th>
+                                                    <th>
+                                                        <div class="text"><span>Eventos</span></div>
+                                                        <div class="clear"></div>
+                                                    </th>
+                                                    <th>
+                                                        <div class="text"><span>Ações</span></div>
+                                                        <div class="clear"></div>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for log in logs %}
+                                                <tr class="row1">
+                                                    <td class="action-checkbox">
+                                                        <input type="checkbox" name="checkboxes" value="{{log.id}}"
+                                                            class="action-select" data-id="{{log.id}}" />
+                                                    </td>
+                                                    <td class="field-__str__">
+                                                        <a> {{log.level.description}}</a>
+                                                    </td>
+                                                    <td class="field-__str__">
+                                                        <a>{{ log.title }}</a>
+                                                    </td>
+                                                    <td class="field-__str__">
+                                                        <a>{{ log.number_events }}</a>
+                                                    </td>
+                                                    <td>
+                                                        <a href="{% url 'logs-delete' log.id %}">Apagar</a>
+                                                        </br>
+                                                        <a href="{% url 'logs-archive' log.id %}">Arquivar</a>
+                                                    </td>
+                                                </tr>
+                                                {% empty %}
+                                                <tr>
+                                                    <td colspan="5" class="text-center">
+                                                        Não há logs para serem listados.
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </form>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <br class="clear" />
+            </div>
+        </div>
+    </body>
+</main>
+{% endblock %}

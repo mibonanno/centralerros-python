@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+<head>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/select/1.3.1/css/select.dataTables.min.css">
+    
+    <script type="text/javascript" src="../static/js/check.js"}"></script>
+</head> 
+<main>
+    <div class="row table-responsive">
+        <div class="col-md-9">
+            <h2>Listagem de Logs</h2>
+        </div>
+        <form action="{% url 'deleteList' %}" method="post" class="delete">
+        <div class="container-login100-form-btn">
+            <button type="submit" class="login100-form-btn" >
+                Deletar selecionados
+            </button>
+        </div>
+        <table id="logTable" class="dataTable" cellspacing="0" width="100%" style="cursor: pointer">
+            <thead>
+                <tr role="row">
+                    <th><input type="checkbox" id="checkAll"></th>
+                    <th>Level </th>
+                    <th>Log </th>
+                    <th>Eventos </th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                    <tr>
+                        <td><input type="checkbox" id="CheckBox" value={{log.id}}></td>
+                        <td> Level 1</td>
+                        <td>
+                            {{ log.title|capfirst }}<br>
+                            {{ log.details }}<br>
+                        </td>
+                        <td>{{ log.number_events }}</td>
+                        
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan=5 class="text-center">
+                            Não há logs para serem listados.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        </form>
+    </div>
+</main>
+
+{% endblock %}
